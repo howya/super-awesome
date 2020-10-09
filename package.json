@@ -1,0 +1,20 @@
+{
+  "name": "super-awesome",
+  "version": "1.0.0",
+  "description": "SuperAwesome Candidate Test",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha 'test/**/*.js' --recursive",
+    "lint": "./node_modules/.bin/eslint --fix src"
+  },
+  "author": "R J Bennett",
+  "license": "ISC",
+  "dependencies": {},
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "mocha": "^6.1.4",
+    "eslint": "^6.6.0",
+    "eslint-config-airbnb-base": "^14.0.0",
+    "eslint-plugin-import": "^2.18.2"
+  }
+}
