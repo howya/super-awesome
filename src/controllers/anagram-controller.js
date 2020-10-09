@@ -23,12 +23,11 @@ module.exports.AnagramController = class {
       const anagramGroup = new AnagramGroup();
 
       // Iterate through each word in input iterator and pass to checkAnagram
-      // for await (const line of streamAsyncIterator) {
-      //   outputArrayOfStringsToStdOut(anagramGroup.checkAnagram(line));
-      // }
+      for await (const line of streamAsyncIterator) {
+        outputArrayOfStringsToStdOut(anagramGroup.checkAnagram(line));
+      }
 
-      streamAsyncIterator.forEach(line => outputArrayOfStringsToStdOut(anagramGroup.checkAnagram(line)))
-      // Get last set of groups after input ended
+      // Get last set of groups after input ended (if there are any)
       outputArrayOfStringsToStdOut(anagramGroup.getGroupsAsArrayOfGroupedStrings());
     } catch (err) {
       throw new ControllerError(
