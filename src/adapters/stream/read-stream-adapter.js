@@ -1,10 +1,15 @@
 const readline = require('readline');
 const stream = require('stream');
-const { AdapterValidationError } = require('./errors/validation-error');
-const { AdapterGeneralError } = require('./errors/general-error');
+const { AdapterValidationError } = require('../errors/validation-error');
+const { AdapterGeneralError } = require('../errors/general-error');
 
 /**
  * Simple read stream adapter class
+ *
+ * Ideally this would extend a BaseStreamAdapter class,
+ * but with these trivial example classes, there is no common stream
+ * functionality
+ *
  * @type {ReadStreamAdapter}
  */
 module.exports.ReadStreamAdapter = class {

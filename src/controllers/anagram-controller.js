@@ -1,5 +1,5 @@
-const { ReadStreamAdapter } = require('../adapters/read-stream-adapter');
-const { WriteStreamAdapter } = require('../adapters/write-stream-adapter');
+const { ReadStreamAdapter } = require('../adapters/stream/read-stream-adapter');
+const { WriteStreamAdapter } = require('../adapters/stream/write-stream-adapter');
 const { ControllerError } = require('./errors/controller-error');
 const { AnagramGroup } = require('../services/anagram-group');
 
@@ -9,18 +9,22 @@ const { AnagramGroup } = require('../services/anagram-group');
  */
 module.exports.AnagramController = class {
   /**
-   * Processes the stream of anagrams
-   * @param stream instance of readable stream
-   * https://nodejs.org/api/stream.html#stream_class_stream_readable
+   * Processes the stream of anagrams from input stream
+   * and present in output stream
+   *
+   * input: https://nodejs.org/api/stream.html#stream_class_stream_readable
+   * output: https://nodejs.org/api/stream.html#stream_class_stream_writeable
    * @returns {Promise<void>}
    * @throws ControllerError
+   * @param inputStream
+   * @param outputStream
    */
-  static async processAnagramStream(stream) {
-    // Note, we do not validate stream here, it is validated on
+  static async processAnagramStream(inputStream, outputStream) {
+    // Note, we do not validate streams here, it is validated on
     // StreamAdapter construction
     try {
-      const readStreamAdapter = new ReadStreamAdapter(stream);
-      const writeStreamAdapter = new WriteStreamAdapter(process.stdout);
+      const readStreamAdapter = new ReadStreamAdapter(inputStream);
+      const writeStreamAdapter = new WriteStreamAdapter(outputStream);
       const readStreamAsyncIterator = readStreamAdapter.getAsyncStreamLineIterator();
       const anagramGroup = new AnagramGroup();
       let checkAnagramResult;

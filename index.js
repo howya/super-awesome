@@ -12,7 +12,7 @@ const { AnagramController } = require('./src/controllers/anagram-controller');
       // console for convenience
       console.log(`There is an issue with your file ${filePath}`, err);
     });
-    await AnagramController.processAnagramStream(fileStream)
+    await AnagramController.processAnagramStream(fileStream, process.stdout)
   } catch(err) {
     // Note, here I would handle the error / bubble / log it etc
     // In this test we don't have a means of logging it, so pushing to
