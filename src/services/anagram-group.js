@@ -120,7 +120,10 @@ module.exports.AnagramGroup = class {
     });
 
     // If we have any groups then return them, otherwise false
-    return hasGroupsArray.length < 1 || hasGroupsArray;
+    if (hasGroupsArray.length > 0) {
+      return hasGroupsArray;
+    }
+    return false;
   }
 
   /**
