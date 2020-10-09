@@ -93,7 +93,7 @@ module.exports.AnagramGroup = class {
   getGroupsAsArrayOfGroupedStrings() {
     // Create map of each cleansed word, pushing on the
     // clear words associated
-    const groupedByCleansedWordObj = this.groupedByLengthArray.reduce((accum, current) => {
+    const groupedByCleansedWordMap = this.groupedByLengthArray.reduce((accum, current) => {
       if (accum.has(current.cleansed)) {
         accum.get(current.cleansed).push(current.word);
       } else {
@@ -102,8 +102,11 @@ module.exports.AnagramGroup = class {
       return accum;
     }, new Map());
 
+    // Use the map to construct an array where each element is
+    // a string of clear words that correspond to the map key
+    // if the map key value array has more than one clear word
     const hasGroupsArray = [];
-    groupedByCleansedWordObj.forEach((clearArray) => {
+    groupedByCleansedWordMap.forEach((clearArray) => {
       if (clearArray.length > 1) {
         hasGroupsArray.push(this.concatArrayOfStrings(clearArray));
       }
