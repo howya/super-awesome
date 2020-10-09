@@ -62,7 +62,7 @@ module.exports.AnagramGroup = class {
   /**
    * Check that length is greater than the length of
    * cleansed words in the current group - we can cheat here
-   * as
+   * as all cleansed words will be the same length
    * @param length
    * @returns {boolean}
    */
@@ -73,6 +73,11 @@ module.exports.AnagramGroup = class {
     return true;
   }
 
+  /**
+   *
+   * @param cleansed
+   * @returns {boolean}
+   */
   checkWordMapLengthMatchToGroup(cleansed) {
     if (this.groupedByLengthArray.length > 0) {
       return this.groupedByLengthArray[0].cleansed.length === cleansed.length;
@@ -116,7 +121,9 @@ module.exports.AnagramGroup = class {
   }
 
   /**
-   *
+   * Takes a string and returns a lowercase string with
+   * chars ordered asc. Any anagram permutation will have the
+   * same lowercase ordered string value.
    * @param word
    * @returns {string}
    */
