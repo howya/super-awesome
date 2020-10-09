@@ -12,9 +12,17 @@ module.exports.AnagramGroup = class {
     this.groupedByLengthArray = [];
   }
 
+  /**
+   *
+   * @param word
+   * @returns {boolean|Array}
+   */
   checkAnagram(word) {
     try {
       // TODO validate word is string with no spaces
+
+      // For a word, cleanse it and construct an object that
+      // maps the cleansed word to the 'clear' word
       const wordMap = {
         cleansed: this.cleanseWord(word),
         word,
@@ -87,8 +95,7 @@ module.exports.AnagramGroup = class {
 
   /**
    *
-   * words
-   * @returns {array}
+   * @returns {boolean|[]}
    */
   getGroupsAsArrayOfGroupedStrings() {
     // Create map of each cleansed word, pushing on the
@@ -112,7 +119,8 @@ module.exports.AnagramGroup = class {
       }
     });
 
-    return hasGroupsArray;
+    // If we have any groups then return them, otherwise false
+    return hasGroupsArray.length < 1 || hasGroupsArray;
   }
 
   /**

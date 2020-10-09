@@ -1,4 +1,5 @@
-const { StreamAdapter } = require('../adapters/stream-adapter');
+const { ReadStreamAdapter } = require('../adapters/read-stream-adapter');
+const { WriteStreamAdapter } = require('../adapters/write-stream-adapter');
 const { ControllerError } = require('./errors/controller-error');
 const { AnagramGroup } = require('../services/anagram-group');
 
@@ -18,17 +19,27 @@ module.exports.AnagramController = class {
     // Note, we do not validate stream here, it is validated on
     // StreamAdapter construction
     try {
-      const streamAdapter = new StreamAdapter(stream);
-      const streamAsyncIterator = streamAdapter.getAsyncStreamLineIterator();
+      const readStreamAdapter = new ReadStreamAdapter(stream);
+      const writeStreamAdapter = new WriteStreamAdapter(process.stdout);
+      const readStreamAsyncIterator = readStreamAdapter.getAsyncStreamLineIterator();
       const anagramGroup = new AnagramGroup();
+      let checkAnagramResult;
 
       // Iterate through each word in input iterator and pass to checkAnagram
-      for await (const line of streamAsyncIterator) {
-        outputArrayOfStringsToStdOut(anagramGroup.checkAnagram(line));
+      for await (const line of readStreamAsyncIterator) {
+        checkAnagramResult = anagramGroup.checkAnagram(line);
+        // If checkAnagram returns result then send to stream
+        if (checkAnagramResult !== false) {
+          writeStreamAdapter.writeArrayOfStringsToSteam(checkAnagramResult);
+        }
       }
 
       // Get last set of groups after input ended (if there are any)
-      outputArrayOfStringsToStdOut(anagramGroup.getGroupsAsArrayOfGroupedStrings());
+      checkAnagramResult = anagramGroup.getGroupsAsArrayOfGroupedStrings();
+      // If getGroupsAsArrayOfGroupedStrings returns result then send to stream
+      if (checkAnagramResult !== false) {
+        writeStreamAdapter.writeArrayOfStringsToSteam(checkAnagramResult);
+      }
     } catch (err) {
       throw new ControllerError(
         'AnagramController.processAnagramStream failed',
@@ -36,12 +47,4 @@ module.exports.AnagramController = class {
       );
     }
   }
-};
-
-const outputArrayOfStringsToStdOut = (stringArray) => {
-  if (!stringArray) return false;
-  stringArray.forEach(
-    (groupString) => process.stdout.write(`${groupString}\n`),
-  );
-  return true;
 };

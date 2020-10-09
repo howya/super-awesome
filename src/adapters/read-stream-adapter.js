@@ -4,10 +4,10 @@ const { AdapterValidationError } = require('./errors/validation-error');
 const { AdapterGeneralError } = require('./errors/general-error');
 
 /**
- * Simple stream adapter class
- * @type {StreamAdapter}
+ * Simple read stream adapter class
+ * @type {ReadStreamAdapter}
  */
-module.exports.StreamAdapter = class {
+module.exports.ReadStreamAdapter = class {
   /**
    * Construct with instance of readable stream
    * https://nodejs.org/api/stream.html#stream_class_stream_readable
@@ -15,15 +15,11 @@ module.exports.StreamAdapter = class {
    * @throws AdapterValidationError
    */
   constructor(targetStream) {
-    /*
-    Validate that the input stream is a readable stream
-    This should be extended if this adapter were extended
-    to support stream writing
-    */
+    // Validate that the input stream is a readable stream
     if (!(targetStream instanceof stream.Stream
       && typeof (targetStream._read === 'function')
       && typeof (targetStream._readableState === 'object'))) {
-      throw new AdapterValidationError('StreamAdapter.constructor targetStream not readable stream');
+      throw new AdapterValidationError('ReadStreamAdapter.constructor targetStream not readable stream');
     }
     this.stream = targetStream;
   }
@@ -41,7 +37,7 @@ module.exports.StreamAdapter = class {
       });
     } catch (err) {
       throw new AdapterGeneralError(
-        'StreamAdapter.getAsyncStreamLineIterator failed',
+        'ReadStreamAdapter.getAsyncStreamLineIterator failed',
         err,
       );
     }
