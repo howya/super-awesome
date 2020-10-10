@@ -31,19 +31,15 @@ module.exports.AnagramController = class {
 
       // Iterate through each word in input iterator and pass to checkAnagram
       for await (const line of readStreamAsyncIterator) {
-        checkAnagramResult = anagramGroup.checkAnagram(line);
-        // If checkAnagram returns result then send to stream
-        if (checkAnagramResult !== false) {
-          writeStreamAdapter.writeArrayOfStringsToSteam(checkAnagramResult);
-        }
+        writeStreamAdapter.writeArrayOfStringsToSteam(
+          anagramGroup.checkAnagram(line)
+        );
       }
 
       // Get last set of groups after input ended (if there are any)
-      checkAnagramResult = anagramGroup.getGroupsAsArrayOfGroupedStrings();
-      // If getGroupsAsArrayOfGroupedStrings returns result then send to stream
-      if (checkAnagramResult !== false) {
-        writeStreamAdapter.writeArrayOfStringsToSteam(checkAnagramResult);
-      }
+      writeStreamAdapter.writeArrayOfStringsToSteam(
+        anagramGroup.getGroupsAsArrayOfGroupedStrings()
+      );
     } catch (err) {
       throw new ControllerError(
         'AnagramController.processAnagramStream failed',
