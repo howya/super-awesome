@@ -35,7 +35,7 @@ module.exports.AnagramGroup = class {
 
       // If the groupArray is empty then we have
       // nothing to compare. Push onto the array and
-      // return false to indicate there is not a complete group yet
+      // return [] to indicate there is not a complete group yet
       if (this.groupedByLengthArray.length < 1) {
         this.groupedByLengthArray.push(wordMap);
         return [];
@@ -55,15 +55,13 @@ module.exports.AnagramGroup = class {
 
       // start a new group (unless the new word length is <
       // previous length, then error)
-      if (this.checkLengthMoreThanGroupCleansedLength(
-        wordMap.cleansed.length,
-      )) {
+      if (this.checkLengthMoreThanGroupCleansedLength(word.length)) {
         this.groupedByLengthArray = [];
         this.groupedByLengthArray.push(wordMap);
         return currentGroupsAsAnagramStringGroupedArray;
       }
 
-      throw new ServiceValidationError('input not ordered length ascending');
+      throw new ServiceValidationError(`input not ordered length ascending at: ${word}`);
     } catch (err) {
       throw new ServiceGeneralError(
         'AnagramGroup.checkAnagram failed',
