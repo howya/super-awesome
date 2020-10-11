@@ -32,6 +32,7 @@ module.exports.WriteStreamAdapter = class {
    *
    * @param stringArray
    * @returns {*}
+   * @throws AdapterGeneralError
    */
   writeArrayOfStringsToSteam(stringArray) {
     try {
@@ -50,6 +51,7 @@ module.exports.WriteStreamAdapter = class {
    *
    * @param stringToWrite
    * @returns {void|undefined|string|*|PromiseLike<void>|Promise<void>}
+   * @throws AdapterGeneralError
    */
   writeToStream(stringToWrite) {
     try {

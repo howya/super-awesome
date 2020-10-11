@@ -2,8 +2,19 @@ const { ServiceGeneralError } = require('./errors/general-error');
 const { ServiceValidationError } = require('./errors/validation-error');
 
 /* eslint class-methods-use-this: [
-  "error", { "exceptMethods": ["concatArrayOfStrings", "cleanseWord"] }
+  "error", { "exceptMethods": ["mapToArrayOfStrings","cleanseWord","groupedByCleansedWordMap"] }
 ] */
+/**
+ * Processes words passed in ascending order of length into groups
+ * that are related by having the same letters (anagrams).
+ *
+ * To process a new word, call checkAnagram(word)
+ *
+ * Once all words have been processed, call getGroupsAsArrayOfGroupedStrings()
+ * to get any remaining groups
+ *
+ * @type {AnagramGroup}
+ */
 module.exports.AnagramGroup = class {
   /**
    * Instantiate the empty groupedByLengthArray
@@ -13,16 +24,29 @@ module.exports.AnagramGroup = class {
   }
 
   /**
+   * With each word passed, if the word is the first word, or the same
+   * length as the previous word passed, then persist the word in the
+   * local groupedByLengthArray. The empty array is returned to indicate
+   * that group processing is not yet complete (the next word could be
+   * of the same length and potentially belong in the current group).
+   *
+   * If the word passed is smaller than the previous word then an error
+   * is thrown as the input is not ordered in length ascending.
+   *
+   * Finally, if the word length is greater than the previous word passed,
+   * then return an array of all anagram group strings for the previous length
+   * and start a new group with word passed.
    *
    * @param word
    * @returns {Array}
+   * @throws ServiceGeneralError
    */
   checkAnagram(word) {
     try {
       // Ensure word is a string without white space
-      if(typeof word !== 'string' || /\s/.test(word)) {
+      if (typeof word !== 'string' || /\s/.test(word)) {
         throw new ServiceValidationError(
-          'input not a string, or contains whitespace, typeof: ${typeof word}'
+          `input not a string, or contains whitespace, typeof: ${typeof word}`,
         );
       }
 
@@ -30,7 +54,7 @@ module.exports.AnagramGroup = class {
       // maps the cleansed word to the 'clear' word
       const wordMap = {
         cleansed: this.cleanseWord(word),
-        word,
+        clear: word,
       };
 
       // If the groupArray is empty then we have
@@ -41,9 +65,15 @@ module.exports.AnagramGroup = class {
         return [];
       }
 
-      // If the cleansed word is the same length as the cleansed
+      // If  the word length is smaller than the words in groupedByLengthArray
+      // The throw error as input file not ordered ascending
+      if (this.getGroupedByLengthArrayWordLength() > word.length) {
+        throw new ServiceValidationError(`input not ordered length ascending at: ${word}`);
+      }
+
+      // If the word is the same length as the cleansed
       // words in the current group then push to the group
-      if (this.checkWordMapLengthMatchToGroup(wordMap.cleansed)) {
+      if (this.getGroupedByLengthArrayWordLength() === word.length) {
         this.groupedByLengthArray.push(wordMap);
         return [];
       }
@@ -53,15 +83,10 @@ module.exports.AnagramGroup = class {
       // so get the existing group plain words as an array string
       const currentGroupsAsAnagramStringGroupedArray = this.getGroupsAsArrayOfGroupedStrings();
 
-      // start a new group (unless the new word length is <
-      // previous length, then error)
-      if (this.checkLengthMoreThanGroupCleansedLength(word.length)) {
-        this.groupedByLengthArray = [];
-        this.groupedByLengthArray.push(wordMap);
-        return currentGroupsAsAnagramStringGroupedArray;
-      }
-
-      throw new ServiceValidationError(`input not ordered length ascending at: ${word}`);
+      // start a new group and return currentGroupsAsAnagramStringGroupedArray
+      this.groupedByLengthArray = [];
+      this.groupedByLengthArray.push(wordMap);
+      return currentGroupsAsAnagramStringGroupedArray;
     } catch (err) {
       throw new ServiceGeneralError(
         'AnagramGroup.checkAnagram failed',
@@ -71,29 +96,19 @@ module.exports.AnagramGroup = class {
   }
 
   /**
-   * Check that length is greater than the length of
-   * cleansed words in the current group - we can cheat here
+   * If there is an element on the groupedByLengthArray, then return
+   * length of the word in the 1st element - we can cheat here
    * as all cleansed words will be the same length
-   * @param length
-   * @returns {boolean}
-   */
-  checkLengthMoreThanGroupCleansedLength(length) {
-    if (this.groupedByLengthArray.length > 0) {
-      return length > this.groupedByLengthArray[0].cleansed.length;
-    }
-    return true;
-  }
-
-  /**
    *
-   * @param cleansed
-   * @returns {boolean}
+   * If groupedByLengthArray is empty, return 0
+   *
+   * @returns {int}
    */
-  checkWordMapLengthMatchToGroup(cleansed) {
+  getGroupedByLengthArrayWordLength() {
     if (this.groupedByLengthArray.length > 0) {
-      return this.groupedByLengthArray[0].cleansed.length === cleansed.length;
+      return this.groupedByLengthArray[0].clear.length;
     }
-    return false;
+    return 0;
   }
 
   /**
@@ -105,16 +120,27 @@ module.exports.AnagramGroup = class {
    * where each element is the join of the clear word array associated with
    * the key
    *
+   * Returns the empty array if no anagrams found. If an Anagram is found, returns
+   * an array of strings, where each element represents a group of words that
+   * anagrams (of each other)
+   *
+   *
    * @returns {Array}
    */
   getGroupsAsArrayOfGroupedStrings() {
     return this.mapToArrayOfStrings(
       this.groupedByCleansedWordMap(this.groupedByLengthArray),
-      1,
+      2,
     );
   }
 
   /**
+   * Group the clear words with same cleansed word into an array
+   * associated to a map key (the cleansed word).
+   *
+   * This allows us to a) identify the clear words to map to the same
+   * cleansed words (anagrams) and b) to easily select anagram groups
+   * with group size > 1
    *
    * @param groupedByLengthArray
    * @returns {map}
@@ -122,9 +148,9 @@ module.exports.AnagramGroup = class {
   groupedByCleansedWordMap(groupedByLengthArray) {
     return groupedByLengthArray.reduce((accum, current) => {
       if (accum.has(current.cleansed)) {
-        accum.get(current.cleansed).push(current.word);
+        accum.get(current.cleansed).push(current.clear);
       } else {
-        accum.set(current.cleansed, [current.word]);
+        accum.set(current.cleansed, [current.clear]);
       }
       return accum;
     }, new Map());
@@ -133,16 +159,16 @@ module.exports.AnagramGroup = class {
   /**
    * Construct an array where each element is
    * a string of clear words that correspond to the map key
-   * if the map key value array.length > length
+   * if the map key value array.length >= groupSize
    *
    * @param map
-   * @param length
+   * @param groupSize
    * @returns {[]}
    */
-  mapToArrayOfStrings(map, length) {
+  mapToArrayOfStrings(map, groupSize) {
     const hasGroupsArray = [];
     map.forEach((clearArray) => {
-      if (clearArray.length > length) {
+      if (clearArray.length >= groupSize) {
         hasGroupsArray.push(clearArray.join(', '));
       }
     });

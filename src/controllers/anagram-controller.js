@@ -27,18 +27,17 @@ module.exports.AnagramController = class {
       const writeStreamAdapter = new WriteStreamAdapter(outputStream);
       const readStreamAsyncIterator = readStreamAdapter.getAsyncStreamLineIterator();
       const anagramGroup = new AnagramGroup();
-      let checkAnagramResult;
 
       // Iterate through each word in input iterator and pass to checkAnagram
       for await (const line of readStreamAsyncIterator) {
         writeStreamAdapter.writeArrayOfStringsToSteam(
-          anagramGroup.checkAnagram(line)
+          anagramGroup.checkAnagram(line),
         );
       }
 
       // Get last set of groups after input ended (if there are any)
       writeStreamAdapter.writeArrayOfStringsToSteam(
-        anagramGroup.getGroupsAsArrayOfGroupedStrings()
+        anagramGroup.getGroupsAsArrayOfGroupedStrings(),
       );
     } catch (err) {
       throw new ControllerError(
