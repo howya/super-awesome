@@ -146,11 +146,11 @@ module.exports.AnagramGroup = class {
    * @returns {map}
    */
   groupedByCleansedWordMap(groupedByLengthArray) {
-    return groupedByLengthArray.reduce((accum, current) => {
-      if (accum.has(current.cleansed)) {
-        accum.get(current.cleansed).push(current.clear);
+    return groupedByLengthArray.reduce((accum, { cleansed, clear }) => {
+      if (accum.has(cleansed)) {
+        accum.get(cleansed).push(clear);
       } else {
-        accum.set(current.cleansed, [current.clear]);
+        accum.set(cleansed, [clear]);
       }
       return accum;
     }, new Map());
