@@ -2,7 +2,8 @@ const { ServiceGeneralError } = require('./errors/general-error');
 const { ServiceValidationError } = require('./errors/validation-error');
 
 /* eslint class-methods-use-this: [
-  "error", { "exceptMethods": ["mapToArrayOfStrings","cleanseWord","groupedByCleansedWordMap"] }
+  "error", { "exceptMethods": ["mapToArrayOfStrings","cleanseWord",
+  "groupedByCleansedWordMap", "wordValidation"] }
 ] */
 /**
  * Processes words passed in ascending order of length into groups
@@ -43,12 +44,8 @@ module.exports.AnagramGroup = class {
    */
   checkAnagram(word) {
     try {
-      // Ensure word is a string without white space
-      if (typeof word !== 'string' || /\s/.test(word)) {
-        throw new ServiceValidationError(
-          `input not a string, or contains whitespace, typeof: ${typeof word}`,
-        );
-      }
+      // Validate word
+      this.wordValidation(word);
 
       // For a word, cleanse it and construct an object that
       // maps the cleansed word to the 'clear' word
@@ -93,6 +90,36 @@ module.exports.AnagramGroup = class {
         err,
       );
     }
+  }
+
+  /**
+   * Validates the incoming word
+   * @param word
+   * @returns {boolean}
+   * @throws ServiceValidationError
+   */
+  wordValidation(word) {
+    // Ensure word is a string without white space
+    if (typeof word !== 'string') {
+      throw new ServiceValidationError(
+        `input not a string, typeof: ${typeof word}`,
+      );
+    }
+
+    // Ensure only a-zA-Z chars, no whitespace, hyphens etc
+    if (/[^a-z]/ig.test(word)) {
+      throw new ServiceValidationError(
+        `input string contains non-alphabetic character or white space: ${word}`,
+      );
+    }
+
+    // Ensure not the empty string
+    if (word.length === 0) {
+      throw new ServiceValidationError(
+        `input string may not be the empty string: ${word}`,
+      );
+    }
+    return true;
   }
 
   /**
@@ -187,7 +214,6 @@ module.exports.AnagramGroup = class {
    */
   cleanseWord(word) {
     return word.toLowerCase()
-      .replace(/[^a-z\d]/g, '')
       .split('')
       .sort()
       .join('');
